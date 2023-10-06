@@ -6,6 +6,7 @@ const authController = require("../controllers/authController");
 
 // Import the User model (adjust the import path based on your project structure)
 const User = require("../models/user");
+const multer = require("multer");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
