@@ -5,8 +5,9 @@ const bcrypt = require("bcrypt");
 // Registration controller
 const register = async (req, res) => {
   try {
-    const { username, password } = req.body; // Retrieve username and password from the request body
-
+    const { username, password, email } = req.body; // Retrieve username, password, and email from the request body
+    // Retrieve the uploaded profile picture
+    console.log(req.body);
     // Check if the username is already taken
     const existingUser = await User.findOne({ username });
 
@@ -14,8 +15,12 @@ const register = async (req, res) => {
       return res.status(400).json({ message: "Username is already taken" });
     }
 
-    // Create a new user
-    const newUser = new User({ username, password });
+    // Create a new user with image data (if provided)
+    const newUser = new User({
+      username,
+      password,
+      email,
+    });
 
     // Save the user to the database
     await newUser.save();
@@ -30,22 +35,30 @@ const register = async (req, res) => {
 // Login controller
 const login = async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const { email, password } = req.body;
 
-    if (!user) {
+    const user = await User.findOne({ email });
+    if (!email) {
       return res.status(401).json({ message: "Authentication failed" });
     }
 
     // Compare the user-entered password with the hashed password in the database
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    const passwordMatch = await user.comparePassword(password);
 
     if (!passwordMatch) {
+      console.log();
       return res.status(401).json({ message: "Authentication failed" });
     }
 
     // Create a JSON Web Token (JWT) for the user
-    const token = jwt.sign({ username: user.username }, process.env.JWT_SECRET);
+    const token = jwt.sign(
+      {
+        username: user.username,
+        expiresIn: 60 * 60,
+        profileImg: user.profilePicture,
+      },
+      process.env.JWT_SECRET
+    );
 
     // Send the JWT as a response
     res.json({ token });

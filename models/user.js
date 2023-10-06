@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  profilePicture: {
+    data: Buffer, // Store binary data for the image
+    contentType: String, // Store the content type (e.g., image/jpeg, image/png)
+  },
   // Add more fields as needed for your user profile
 });
 
@@ -36,6 +40,16 @@ userSchema.pre("save", async function (next) {
 });
 
 // Create the User model
+// Create the User model
 const User = mongoose.model("User", userSchema);
+
+// Function to compare user-entered password with the hashed password in the database
+User.prototype.comparePassword = async function (password) {
+  try {
+    return await bcrypt.compare(password, this.password);
+  } catch (error) {
+    throw error;
+  }
+};
 
 module.exports = User;
