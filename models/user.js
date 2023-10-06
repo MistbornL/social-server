@@ -21,7 +21,8 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   profilePicture: {
-    type: Image, // Store binary data for the image
+    type: Buffer, // Store binary data for the image
+    contentType: String, // Store the content type (e.g., image/jpeg, image/png)
   },
   // Add more fields as needed for your user profile
 });
